@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Engine</title>
+
+    <!-- CSS links -->
+    <link rel="stylesheet" href="/static/styles/mini-default.min.css">
+    <link rel="stylesheet" href="/static/styles/index.css">
+
+</head>
+<body>
+
+    <div class="row">
+        <div class="col-sm-3 div-docs">
+            <div style="text-align: center; margin: 25px; color: aliceblue;">
+                <span style="font-weight: bold; font-size: 18-px;">تمام داکیومنت ها</span>
+            </div>
+            <div class="all-docs">
+                <a href="{{ url_for('add_doc') }}">
+                    <img class="add" src="/static/img/add.png" alt="">
+                </a>
+
+                {% for document in documents %}
+                <div class="row docs-title">
+                    <div class="col-sm-9">
+                        <a href="{{ url_for('edit_doc', doc_title=document) }}">
+                            <p class="p-doc-title">{{ document }}</p>
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="{{ url_for('delete_doc', doc_title=document) }}">
+                            <img class="del-img" src="/static/img/del.png" alt="">
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <div class="col-sm-8">
+            <form action="{{ url_for('index') }}" class="form" method="GET">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <input type="submit" value="جستجو">
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="text" name="query" class="input-text">
+                    </div>
+                </div>
+            </form>
+
+            {% for doc in top_k_docs %}
+            <div class="row search-result">
+                <div class="col-sm-10">
+                    <a style="text-decoration: none;" href="{{ url_for('edit_doc', doc_title=doc[0]) }}">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <p class="p-doc-title">نام فایل : {{ doc[0][:-4] }}</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="p-score">Score: {{ doc[1] }}</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+</body>
+</html>

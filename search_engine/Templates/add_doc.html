@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موتور جستجو</title>
+
+    <!-- CSS links -->
+    <link rel="stylesheet" href="/static/styles/mini-default.min.css">
+    <link rel="stylesheet" href="/static/styles/add_doc.css">
+</head>
+
+<body>
+    
+    <form action="{{ url_for('add_doc') }}" class="form-add-doc" method="POST">
+        <!-- flash messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <!-- end flash messages -->
+        
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <input type="text" placeholder="نام فایل مورد نظر را وارد کنید" name="doc_title" class="doc-title" value="{{ doc_title }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <textarea name="document" placeholder="متن فایل را وارد کنید" class="document">{{ document }}</textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-7">
+                <input type="submit" value="فایل را ذخیره میکنم">
+            </div>
+            <div class="col-sm-2">
+                <button><a href="{{ url_for('index') }}">Home</a></button>
+            </div>
+        </div>
+    </form>
+
+</body>
+</html>

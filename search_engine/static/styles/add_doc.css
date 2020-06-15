@@ -1,0 +1,19 @@
+body{
+    direction: rtl;
+    background-color: rgb(51, 66, 112);
+}
+
+.form-add-doc{
+    margin: 50px 100px 100px 100px;
+}
+
+.doc-title{
+    width: 100%;
+}
+
+.document{
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 300px;
+    min-height: 400px;
+}

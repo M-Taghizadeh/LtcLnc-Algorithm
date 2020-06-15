@@ -1,0 +1,92 @@
+body{
+    direction: rtl;
+    background-color: rgb(51, 66, 112);
+}
+
+.div-docs{
+    height: 660px;
+    overflow: auto;
+    margin-top: 5px;
+    border: 1px solid #212121;
+    background-color:  #644d4d;
+    padding: 10px;
+    direction: ltr;
+}
+
+.all-docs{
+    border: 1px solid #8a8a8a;
+    direction: ltr;
+    background-color: #8d7878;
+}
+
+.add{
+    width: 50px;
+    direction: ltr;
+    margin: 10px;
+    padding: 10px;
+}
+
+.docs-title{
+    direction: rtl;
+    margin: 10px;
+    border: 1px solid #0a0909;
+    border-radius: 3px;
+    background-color: rgb(77, 153, 115);
+}
+
+.docs-title:hover{
+    background-color: rgb(66, 121, 93);
+}
+
+.p-doc-title{
+    color: rgb(253, 253, 253);
+}
+
+.del-img{
+    width: 30px;
+    height: 30px;
+    margin: 5px;    
+}
+
+.del-img:hover{
+    width: 32px;
+    height: 32px;
+}
+
+.add:hover{
+    background: url(img/add2.jpg);
+}
+
+.mylogo{
+    width: 120px;
+    height: 80px;
+}
+
+.form{
+    margin-top: 2%;
+    direction: rtl;
+}
+
+.input-text{
+    width: 100%;
+}
+
+.div-results{
+    margin: 10px;
+    direction: rtl;
+}
+
+.search-result{
+    direction: rtl;
+    margin: 10px;
+    border-radius: 3px;
+    background-color: rgb(81, 96, 128);
+}
+
+.search-result:hover{
+    background-color: rgb(55, 47, 68);
+}
+
+.p-score{
+    color: aliceblue;
+}
