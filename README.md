@@ -29,13 +29,14 @@ documents = [f for f in os.listdir(docs_path) if f.endswith('.txt')]
 ```
 
 - **Step3**: Create Postings list for query terms and calculate N: number of documents and create set of query terms
-```python
-Postings_list = {}
-N = len(documents)
-Postings_list["N"] = N
-set_of_query_term = []
-```
 
+    ```python
+    Postings_list = {}
+    N = len(documents)
+    Postings_list["N"] = N
+    set_of_query_term = []
+    ```
+    
     - **Step3-A**: Calculate [tf] for query term in [Query] 
     ```python    
     for term in query_terms:
