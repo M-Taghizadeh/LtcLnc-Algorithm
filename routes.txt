@@ -1,0 +1,7 @@
+Endpoint    Methods    Rule
+----------  ---------  ------------------------------------
+add_doc     GET, POST  /add_document/
+delete_doc  GET        /delete_document/<string:doc_title>/
+edit_doc    GET        /edit_document/<string:doc_title>/
+index       GET        /
+static      GET        /static/<path:filename>
