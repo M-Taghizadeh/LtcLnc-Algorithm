@@ -1,0 +1,2 @@
+flask => webframework
+python-dotenv => for reading .env files
