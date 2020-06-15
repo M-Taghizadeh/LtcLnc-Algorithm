@@ -3,7 +3,7 @@ Implementation Search Engine with **LTC-LNC** algorithm and Cosine Similarity de
 
 Author: M-Taghizadeh<br>
 Website: [m-taghizadeh.ir](http://m-taghizadeh.ir)
-
+<hr>
 
 # Quick Start
 - [LTC LNC ALgorithm Steps](#LTC-LNC-Algorithm-Steps) 
@@ -28,13 +28,13 @@ query_terms = query.split(" ") # space is splitter
 documents = [f for f in os.listdir(docs_path) if f.endswith('.txt')]
 ```
 
-- **Step3**: Create Postings list for query terms and calculate N: number of documents and create set of query terms 
+- **Step3**: Create Postings list for query terms and calculate N: number of documents and create set of query terms
 ```python
 Postings_list = {}
 N = len(documents)
 Postings_list["N"] = N
 set_of_query_term = []
-```    
+```
 
     - **Step3-A**: Calculate [tf] for query term in [Query] 
     ```python    
