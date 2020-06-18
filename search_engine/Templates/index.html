@@ -15,7 +15,7 @@
     <div class="row">
         <div class="col-sm-3 div-docs">
             <div style="text-align: center; margin: 25px; color: aliceblue;">
-                <span style="font-weight: bold; font-size: 18-px;">تمام داکیومنت ها</span>
+                <span style="font-weight: bold; font-size: 18-px;">مدریت تمام داکیومنت ها</span>
             </div>
             <div class="all-docs">
                 <a href="{{ url_for('add_doc') }}">
@@ -36,7 +36,12 @@
                     </div>
                 </div>
                 {% endfor %}
+            </div>
 
+            <div style="direction: rtl; margin-right: 20%; margin-top: 10%;" class="row">
+                <a href="{{ url_for('create_postings_list_route') }}">
+                    <button>ایندکس گذاری فایلها</button>
+                </a>
             </div>
         </div>
 
@@ -47,10 +52,25 @@
                         <input type="submit" value="جستجو">
                     </div>
                     <div class="col-sm-9">
-                        <input type="text" name="query" class="input-text">
+                        <input type="text" name="q" class="input-text">
                     </div>
                 </div>
             </form>
+
+            <div class="row result-numbers">
+                {% if top_k_docs %}
+                    <p class="p-result-numbers">   
+                        {{ top_k_docs|length }} فایل بازیابی شد.
+                    </p>
+                    {% else %}
+                        {% if request.args.get('q') %}
+                            <p class="p-result-numbers">
+                                نتیجه ای یافت نشد :(
+                            </p>
+                        {% endif %}
+                {% endif %}
+            </div>
+            <hr>
 
             {% for doc in top_k_docs %}
             <div class="row search-result">
@@ -68,7 +88,6 @@
                 </div>
             </div>
             {% endfor %}
-
         </div>
     </div>
 

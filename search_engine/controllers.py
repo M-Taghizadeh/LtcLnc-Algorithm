@@ -1,18 +1,23 @@
 import os
 from flask import flash, redirect, render_template, request, url_for
 from . import app
+from .create_postings_list import create_postings_list_on_all_docs, update_postings_list_on_this_doc
 from .search_engine_core import ltc_lnc
+
+# database directories:
+postings_path = "Postings_lists/"
+docs_path = "database/"
 
 @app.route("/", methods=["GET"])
 def index():
     # Loading all documents
-    path = "database/"
-    documents = [f for f in os.listdir(path) if f.endswith('.txt')]
+    documents = [f for f in os.listdir(docs_path) if f.endswith('.txt')]
     
-    query = request.args.get("query")
+    # get user query
+    query = request.args.get("q")
     if query:
         # Core of Search Engine:
-        top_k_docs = ltc_lnc(query, path, 5)
+        top_k_docs = ltc_lnc(query, postings_path, docs_path, 10) # you can set k (top k documents)
         return render_template("index.html", top_k_docs=top_k_docs, documents=documents)
 
     return render_template("index.html", documents=documents)
@@ -29,6 +34,13 @@ def add_doc():
             f = open(f'database/{doc_title}', "w", encoding="utf-8")
             f.write(document)
             f.close()
+
+            # Create postings_list for all documents
+            try:
+                update_postings_list_on_this_doc(postings_path, docs_path, doc_title)
+            except:
+                create_postings_list_on_all_docs(postings_path, docs_path)
+
         else:
             flash("متن داکیومنت را بنویسید")
             return render_template("add_doc.html")
@@ -51,5 +63,15 @@ def edit_doc(doc_title):
 def delete_doc(doc_title):
     # delete file with os lib
     os.remove(f'database/{doc_title}')
+    
+    # TODO update POSTINGS_LIST
+
     # reload home page
+    return redirect(url_for("index"))
+
+
+@app.route("/create_postings_list/")
+def create_postings_list_route():
+    # Create postings_list for all documents
+    create_postings_list_on_all_docs(postings_path, docs_path)
     return redirect(url_for("index"))

@@ -26,6 +26,10 @@ body{
     padding: 10px;
 }
 
+.add:hover{
+    background-color: #837070;
+}
+
 .docs-title{
     direction: rtl;
     margin: 10px;
@@ -53,10 +57,6 @@ body{
     height: 32px;
 }
 
-.add:hover{
-    background: url(img/add2.jpg);
-}
-
 .mylogo{
     width: 120px;
     height: 80px;
@@ -74,6 +74,15 @@ body{
 .div-results{
     margin: 10px;
     direction: rtl;
+}
+
+.result-numbers{
+    direction: rtl;
+    margin: 10px;
+}
+
+.p-result-numbers{
+    color: rgb(144, 255, 172);
 }
 
 .search-result{
