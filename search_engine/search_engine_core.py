@@ -74,7 +74,7 @@ def ltc_lnc(query, postings_path, docs_path, k):
 
         Index_Table[term]["query"]["wt"] = Index_Table[term]["query"]["tf_wt"] * Index_Table[term]["query"]["idf"]
 
-    # Step5-E: Calculate [wt] for query term in [all Documents] => idf = 1, wt = tf_wt * idf(==1)
+    # Step4-E: Calculate [wt] for query term in [all Documents] => idf = 1, wt = tf_wt * idf(==1)
     for term in query_terms:
         for doc_title in documents:
             Index_Table[term]["document"][doc_title]["wt"] = Index_Table[term]["document"][doc_title]["tf_wt"]
@@ -84,8 +84,8 @@ def ltc_lnc(query, postings_path, docs_path, k):
     print("Index_Table: ", Index_Table)
     print("------------------------------")
 
-    # Step6: Normalization of Query and goto vector space for [wt]:
-    # Step6-A: calculate sum of wt for Query
+    # Step5: Normalization of Query and goto vector space for [wt]:
+    # Step5-A: calculate sum of wt for Query
     query_vector_normal = []
     sum = 0
     for term in set_of_query_term:
@@ -93,7 +93,7 @@ def ltc_lnc(query, postings_path, docs_path, k):
     sum = math.sqrt(sum)
     print("sum of wt for Query: ", sum)
 
-    # Step6-B: calculate query_vector_normal with sum of wt 
+    # Step5-B: calculate query_vector_normal with sum of wt 
     for term in set_of_query_term:
         wt = Index_Table[term]["query"]["wt"]
         if sum != 0:
@@ -102,19 +102,19 @@ def ltc_lnc(query, postings_path, docs_path, k):
             query_vector_normal.append(0)
     print("\n\nquery_vector_normal: ", query_vector_normal, "\n\n")
 
-    # Step7: Normalization of all Documents and goto vector space for [wt] and save that in docs_vector_normal(as a dict)
+    # Step6: Normalization of all Documents and goto vector space for [wt] and save that in docs_vector_normal(as a dict)
     docs_vector_normal = {}
     for doc_title in documents:
         docs_vector_normal[doc_title] = []
 
-        # Step7-A: calculate sum of wt for any Document
+        # Step6-A: calculate sum of wt for any Document
         sum = 0
         for term in set_of_query_term:
             sum += math.pow(Index_Table[term]["document"][doc_title]["wt"], 2)
         sum = math.sqrt(sum)
         print("sum_wt: ", sum, " doc title: ", doc_title)
         
-        # Step7-B: calculate docs_vector_normal[doc_title] with sum of wt for any document
+        # Step6-B: calculate docs_vector_normal[doc_title] with sum of wt for any document
         for term in set_of_query_term:
             wt = Index_Table[term]["document"][doc_title]["wt"]
             if sum != 0:
@@ -124,8 +124,8 @@ def ltc_lnc(query, postings_path, docs_path, k):
     
     print("\n\ndocs_vector_normal: ", docs_vector_normal, "\n\n")
 
-    # Step8: Cosine Similarity => Score list 
-    # Spte8-A: Dot Product between Query vector normal and any Documents vector normal and save that in Score list[]
+    # Step7: Cosine Similarity => Score list 
+    # Spte7-A: Dot Product between Query vector normal and any Documents vector normal and save that in Score list[]
     Scores_list = []
     for doc_title in docs_vector_normal:
         doc_vector = docs_vector_normal[doc_title]
@@ -135,7 +135,7 @@ def ltc_lnc(query, postings_path, docs_path, k):
         Scores_list.append([doc_title, score])
     print("Scores_list: ", Scores_list)
 
-    # Step9: Sorting Scores_list and get top k doc (get rankings)
+    # Step8: Sorting Scores_list and get top k doc (get rankings)
     min = 0
     for i in range(0, len(Scores_list)):
         for j in range(0, len(Scores_list)-i-1):
@@ -145,7 +145,7 @@ def ltc_lnc(query, postings_path, docs_path, k):
                 Scores_list[j+1] = tmp_Scores_list
     print("\n\nSorted Scores_list: ", Scores_list, "\n\n")
 
-    # Step10: get top k record from Sorted Score List (At the moment, we only return files that have a high score of zero)
+    # Step9: get top k record from Sorted Score List (At the moment, we only return files that have a high score of zero)
     k = N # we suppose that k == number of docs
     TOP_k_docs = []
     for doc in Scores_list:
