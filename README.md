@@ -17,10 +17,18 @@ Website: [m-taghizadeh.ir](http://m-taghizadeh.ir)
 
 - **Step1**: Tokenize query terms and remove extera space and strip query
 ```python
-query = str(query)
-query = query.replace("  ", " ")
-query = query.strip()
-query_terms = query.split(" ") # space is splitter
+query_terms = tokenizer(query)
+
+def tokenizer(input_str:str):
+    input_str.strip()
+    split_list = input_str.split(" ")
+    
+    tokens_list = []
+    for token in split_list:
+        if len(list(token)) > 1:
+            tokens_list.append(token)
+
+    return tokens_list
 ```
 
 - **Step2**: Read all docs and save all doc title in documents variable
@@ -28,115 +36,112 @@ query_terms = query.split(" ") # space is splitter
 documents = [f for f in os.listdir(docs_path) if f.endswith('.txt')]
 ```
 
-- **Step3**: Create Postings list for query terms and calculate N: number of documents and create set of query terms
+- **Step3**: Load Postings List from database
+```python
+POSTINGS_LIST = {}
+try:
+    with open(f'{postings_path}/POSTINGS_LIST.dat', "rb") as f:
+        POSTINGS_LIST = pickle.load(f)
+except:
+    print("we have an error for loading POSTINGS_LIST!!!")
+```
+
+- **Step4**: Create Postings list for query terms and calculate N: number of documents and create set of query terms
 
     ```python
-    Postings_list = {}
+    Index_Table = {}
     N = len(documents)
-    Postings_list["N"] = N
+    Index_Table["N"] = N
     set_of_query_term = []
     ```
     
-    - **Step3-A**: Calculate [tf] for query term in [Query] 
+    - **Step4-A**: Calculate [tf] for query term in [Query] 
     ```python    
     for term in query_terms:
 
-        if Postings_list.get(term):
-            Postings_list[term]["query"]["tf"] += 1
+        if Index_Table.get(term):
+            Index_Table[term]["query"]["tf"] += 1
         else:
-            Postings_list[term] = {}
-            Postings_list[term]["query"] = {}
-            Postings_list[term]["query"]["tf"] = 1
+            Index_Table[term] = {}
+            Index_Table[term]["query"] = {}
+            Index_Table[term]["query"]["tf"] = 1
             set_of_query_term.append(term)
     ```
 
-    - **Step3-B**: Calculate [tf] for query term in [all Documents]
+    - **Step4-B**: Calculate [tf] for query term in [all Documents] from POSTINGS_LIST
     ```python    
     for term in query_terms:
-        Postings_list[term]["document"] = {}
+        Index_Table[term]["document"] = {}
         for doc_title in documents:
-            f = open(docs_path+doc_title, "r", encoding="UTF-8")
-            document_terms = str(f.read()).split(" ")
-            f.close()
-
-            # befor anythings:
-            Postings_list[term]["document"][doc_title] = {}
-            Postings_list[term]["document"][doc_title]["tf"] = 0
-            # after:
-            for doc_term in document_terms:
-                if term == doc_term:
-                    try:
-                        Postings_list[term]['document'][doc_title]["tf"] += 1
-                    except:
-                        try:
-                            Postings_list[term]["document"][doc_title] = {}
-                            Postings_list[term]["document"][doc_title]["tf"] = 1
-                        except:
-                            Postings_list[term]["document"][doc_title]["tf"] = 1
+            Index_Table[term]["document"][doc_title] = {}
+            try:
+                Index_Table[term]["document"][doc_title]["tf"] = POSTINGS_LIST[term][doc_title]
+            except:
+                Index_Table[term]["document"][doc_title]["tf"] = 0
     ```
 
-    - **Step3-C**: Calculate [tf_wt] for query term in [Query and all Documents]
+    - **Step4-C**: Calculate [tf_wt] for query term in [Query and all Documents]
     ```python
     for term in query_terms:
-        tf_query = Postings_list[term]["query"]["tf"]
-        Postings_list[term]["query"]["tf_wt"] = 1 + math.log10(tf_query)
+        tf_query = Index_Table[term]["query"]["tf"]
+        Index_Table[term]["query"]["tf_wt"] = 1 + math.log10(tf_query)
 
         try:
-            for doc_title in Postings_list.get(term).get("document"):
-                tf_document = Postings_list[term]["document"][doc_title]["tf"]
+            for doc_title in Index_Table.get(term).get("document"):
+                tf_document = Index_Table[term]["document"][doc_title]["tf"]
                 if tf_document == 0:
-                    Postings_list[term]["document"][doc_title]["tf_wt"] = 0
+                    Index_Table[term]["document"][doc_title]["tf_wt"] = 0
                 else:
-                    Postings_list[term]["document"][doc_title]["tf_wt"] = 1 + math.log10(tf_document)
+                    Index_Table[term]["document"][doc_title]["tf_wt"] = 1 + math.log10(tf_document)
         except: print("error")
     ```
 
-    - **Step3-D**: Calculate [df, idf, wt] for query term in [Query] => idf = log10(N/df), wt = tf_wt * idf
+    - **Step4-D**: Calculate [df, idf, wt] for query term in [Query] => idf = log10(N/df), wt = tf_wt * idf
     ```python    
     for term in query_terms:
-        df = 0
-        for docs in Postings_list[term]["document"]:
-            if Postings_list[term]["document"][docs]["tf"] > 0:
-                df += 1
-
-        Postings_list[term]["query"]["df"] = df
-        if df == 0:
-            Postings_list[term]["query"]["idf"] = 0
+        if POSTINGS_LIST.get(term):
+            df = len(POSTINGS_LIST[term])
         else:
-            Postings_list[term]["query"]["idf"] = math.log10(N/df)
-        
-        Postings_list[term]["query"]["wt"] = Postings_list[term]["query"]["tf_wt"] * Postings_list[term]["query"]["idf"]
+            df = 0
+
+        Index_Table[term]["query"]["df"] = df
+        if df == 0:
+            Index_Table[term]["query"]["idf"] = 0
+        else:
+            Index_Table[term]["query"]["idf"] = math.log10(N/df)
+
+        Index_Table[term]["query"]["wt"] = Index_Table[term]["query"]["tf_wt"] * Index_Table[term]["query"]["idf"]
     ```
 
-    - **Step3-E**: Calculate [wt] for query term in [all Documents] => idf = 1, wt = tf_wt * idf(==1)
+    - **Step4-E**: Calculate [wt] for query term in [all Documents] => idf = 1, wt = tf_wt * idf(==1)
     ```python
     for term in query_terms:
         for doc_title in documents:
-            Postings_list[term]["document"][doc_title]["wt"] = Postings_list[term]["document"][doc_title]["tf_wt"]
+            Index_Table[term]["document"][doc_title]["wt"] = Index_Table[term]["document"][doc_title]["tf_wt"]
     ```
 
-    - End of Calculate Postings_list
+    - End of Calculate Index_Table
     ```python
     print("------------------------------")    
-    print("Postings_list: ", Postings_list)
+    print("Index_Table: ", Index_Table)
     print("------------------------------")
     ```
 
-- **Step4**: Normalization of Query and goto vector space for [wt]:
-    - **Step4-A**: calculate sum of wt for Query 
+- **Step5**: Normalization of Query and goto vector space for [wt]:
+    - **Step5-A**: calculate sum of wt for Query 
     ```python
     query_vector_normal = []
     sum = 0
     for term in set_of_query_term:
-        sum += math.pow(Postings_list[term]["query"]["wt"], 2)
+        sum += math.pow(Index_Table[term]["query"]["wt"], 2)
     sum = math.sqrt(sum)
     print("sum of wt for Query: ", sum)
     ```
 
-    - **Step4-B**: calculate query_vector_normal with sum of wt 
+    - **Step5-B**: calculate query_vector_normal with sum of wt 
     ```python
     for term in set_of_query_term:
-        wt = Postings_list[term]["query"]["wt"]
+        wt = Index_Table[term]["query"]["wt"]
         if sum != 0:
             query_vector_normal.append(wt / sum)
         else:
@@ -144,22 +149,22 @@ documents = [f for f in os.listdir(docs_path) if f.endswith('.txt')]
     print("\n\nquery_vector_normal: ", query_vector_normal, "\n\n")
     ```
 
-- **Step5**: Normalization of all Documents and goto vector space for [wt] and save that in docs_vector_normal(as a dict)
+- **Step6**: Normalization of all Documents and goto vector space for [wt] and save that in docs_vector_normal(as a dict)
 ```python
 docs_vector_normal = {}
 for doc_title in documents:
     docs_vector_normal[doc_title] = []
 
-    # Step5-A: calculate sum of wt for any Document
+    # Step6-A: calculate sum of wt for any Document
     sum = 0
     for term in set_of_query_term:
-        sum += math.pow(Postings_list[term]["document"][doc_title]["wt"], 2)
+        sum += math.pow(Index_Table[term]["document"][doc_title]["wt"], 2)
     sum = math.sqrt(sum)
     print("sum_wt: ", sum, " doc title: ", doc_title)
     
-    # Step5-B: calculate docs_vector_normal[doc_title] with sum of wt for any document
+    # Step6-B: calculate docs_vector_normal[doc_title] with sum of wt for any document
     for term in set_of_query_term:
-        wt = Postings_list[term]["document"][doc_title]["wt"]
+        wt = Index_Table[term]["document"][doc_title]["wt"]
         if sum != 0:
             docs_vector_normal[doc_title].append(wt / sum)
         else:
@@ -167,8 +172,8 @@ for doc_title in documents:
 print("\n\ndocs_vector_normal: ", docs_vector_normal, "\n\n")
 ```
 
-- **Step6**: Cosine Similarity => Score list 
-    - **Spte6-A**: Dot Product between Query vector normal and any Documents vector normal and save that in Score list[]
+- **Step7**: Cosine Similarity => Score list 
+    - **Spte7-A**: Dot Product between Query vector normal and any Documents vector normal and save that in Score list[]
     ```python
     Scores_list = []
     for doc_title in docs_vector_normal:
@@ -180,7 +185,7 @@ print("\n\ndocs_vector_normal: ", docs_vector_normal, "\n\n")
     print("Scores_list: ", Scores_list)
     ```
 
-- **Step7**: Sorting Scores_list and get top k doc (get rankings)
+- **Step8**: Sorting Scores_list and get top k doc (get rankings)
 ```python
 min = 0
 for i in range(0, len(Scores_list)):
@@ -192,8 +197,19 @@ for i in range(0, len(Scores_list)):
 print("\n\nSorted Scores_list: ", Scores_list, "\n\n")
 ```
 
-- **Step8**: TODO get k record from Sorted Score List 
-
+- **Step9**: get top k record from Sorted Score List (At the moment, we only return files that have a high score of zero)
+```python
+k = N # we suppose that k == number of docs
+TOP_k_docs = []
+for doc in Scores_list:
+    if doc[1] != 0: # doc[1] is score of this doc
+        TOP_k_docs.append(doc)
+    
+    if(len(TOP_k_docs) == k):
+        break
+    
+return TOP_k_docs
+```
 
 # Screen-Shots
 
@@ -211,11 +227,11 @@ print("\n\nSorted Scores_list: ", Scores_list, "\n\n")
 
 4. Creating Posting list according to user query in each time
 
-    ![results](ScreenShots/postings_list_console.png)
+    ![results](ScreenShots/Index_Table_console.png)
 
 5. Posting list structure
 
-    ![results](ScreenShots/postings_list.png)
+    ![results](ScreenShots/Index_Table.png)
 
 6. Creating normal vector for query and all of documents for calculating **Cosine Similarity**
 
