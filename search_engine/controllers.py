@@ -1,7 +1,7 @@
 import os
 from flask import flash, redirect, render_template, request, url_for
 from . import app
-from .create_postings_list import create_postings_list_on_all_docs, update_postings_list_on_this_doc
+from .create_postings_list import create_postings_list_on_all_docs, update_postings_list_on_this_doc, delete_postings_list_on_this_doc
 from .search_engine_core import ltc_lnc
 
 # database directories:
@@ -31,14 +31,14 @@ def add_doc():
         document = request.form.get("document")
 
         if document != "":
-            f = open(f'database/{doc_title}', "w", encoding="utf-8")
+            f = open(f'{docs_path}{doc_title}', "w", encoding="utf-8")
             f.write(document)
             f.close()
 
             # Create postings_list for all documents
-            try:
+            if os.path.exists(f'{postings_path}POSTINGS_LIST.dat'):
                 update_postings_list_on_this_doc(postings_path, docs_path, doc_title)
-            except:
+            else:
                 create_postings_list_on_all_docs(postings_path, docs_path)
 
         else:
@@ -52,7 +52,7 @@ def add_doc():
 
 @app.route("/edit_document/<string:doc_title>/")
 def edit_doc(doc_title):
-    f = open(f'database/{doc_title}', "r", encoding="utf-8")
+    f = open(f'{docs_path}{doc_title}', "r", encoding="utf-8")
     document = str(f.read())
     f.close()
     doc_title = doc_title[:-4]
@@ -61,10 +61,12 @@ def edit_doc(doc_title):
 
 @app.route("/delete_document/<string:doc_title>/")
 def delete_doc(doc_title):
-    # delete file with os lib
-    os.remove(f'database/{doc_title}')
     
-    # TODO update POSTINGS_LIST
+    # update POSTINGS_LIST
+    delete_postings_list_on_this_doc(postings_path, doc_title)
+
+    # delete file with os lib
+    os.remove(f'{docs_path}{doc_title}')
 
     # reload home page
     return redirect(url_for("index"))
